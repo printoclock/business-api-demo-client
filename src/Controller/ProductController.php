@@ -21,7 +21,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/products")
+     * @Route("/")
      *
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception

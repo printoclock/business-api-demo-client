@@ -13,8 +13,8 @@
                     {# API is waiting for heightxwidth value, #}
                     {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
                     {% if option.userInput == 'dimensions' %}
-                        <input name="{{ option.productOption.code }}_height" placeholder="hauteur (mm)" type="text" required="required" />
-                        <input name="{{ option.productOption.code }}_width" placeholder="longueur (mm)" type="text" required="required" />
+                        <input name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
+                        <input name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
                         {# optional: you can use option.validations array to do height/min js validation #}
                         {# or the API will return an error if input is incorrect #}
                     {% else %}
@@ -71,23 +71,27 @@
     <script type="text/javascript">
         $('form#steps').on('submit', function(e) {
             const selectedOptionValues = document.querySelectorAll('#steps option:checked');
-            const inputs = document.querySelectorAll('#steps input[type=text]');
             const optionValuesIds = [];
             const userInputs = {};
             const $form = $(this);
             for (let i = 0; i < selectedOptionValues.length; i++) {
                 optionValuesIds.push(selectedOptionValues[i].value);
             }
-            for (let i = 0; i < inputs.length; i++) {
-                userInputs[inputs[i].name] = inputs[i].value;
+            // Concatenate special case "dimensions".
+            const $inputHeight = $('form#steps input[name=dimensions_height]');
+            const $inputWidth = $('form#steps input[name=dimensions_width]');
+            if ($inputWidth && $inputHeight) {
+                userInputs['dimensions'] = $inputHeight.val()+'x'+$inputWidth.val();
             }
             $('#variants').empty().append('<tr><td>Loading...</td></tr>');
             $.get($form.attr('action'), { optionValueIds: optionValuesIds, inputs: userInputs})
                 .done(function(data) {
+                    console.log(optionValuesIds);
                     let trHTML = '';
                     $.each(data, function (i, variant) {
                         trHTML += '<tr>';
                         for (let i = 0; i < variant.optionValues.length; i++) {
+                            console.log(variant.optionValues[i].id.toString());
                             if (optionValuesIds.indexOf(variant.optionValues[i].id.toString()) === -1) {
                                 trHTML += '<td>' + variant.optionValues[i].option.code + ': ' + variant.optionValues[i].value + '</td>';
                             }
@@ -112,6 +116,13 @@
             const $form = $(this);
             let formData = new FormData();
             formData.append('document', $('#file')[0].files[0]);
+
+            // Concatenate special case "dimensions".
+            const $inputHeight = $('form#steps input[name=dimensions_height]');
+            const $inputWidth = $('form#steps input[name=dimensions_width]');
+            if ($inputWidth && $inputHeight) {
+                formData.append('userInputs[dimensions]', $inputHeight.val()+'x'+$inputWidth.val());
+            }
 
             $.ajax({
                 url : $form.attr('action'),
