@@ -1,0 +1,209 @@
+{% extends '_layout.html.twig' %}
+
+{% block title %}produit {{ product.name }}{% endblock %}
+{% block content %}
+    <h1>produit {{ product.name }} - {{ product.code }}</h1>
+    {% set stepTree = 0 %}
+    <div class="row>">
+         <div class="column">
+            <form id="steps" name="product" action="{{ path('app_product_getvariants', {'productId': product.id}) }}">
+            {% for option in product.stepsOptions %}
+                <h3>{{ option.productOption.name }}</h3>
+                    {# specific dimensions option #}
+                    {# API is waiting for heightxwidth value, #}
+                    {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
+                    {% if option.userInput == 'dimensions' %}
+                        <input name="{{ option.productOption.code }}_height" placeholder="hauteur (mm)" type="text" required="required" />
+                        <input name="{{ option.productOption.code }}_width" placeholder="longueur (mm)" type="text" required="required" />
+                        {# optional: you can use option.validations array to do height/min js validation #}
+                        {# or the API will return an error if input is incorrect #}
+                    {% else %}
+                        {# other normal cases #}
+                        <select name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                            <option></option>
+                            {% for optionValue in option.optionValues %}
+                                <option value="{{ optionValue.id }}">{{ optionValue.value }}</option>
+                            {% endfor %}
+                        </select>*
+                    {% endif %}
+                </p>
+                {% set stepTree = stepTree + 1 %}
+            {% endfor %}
+                <input type="submit" name="get variants price" />
+            </form>
+         </div>
+        <div class="column">
+            <h3>Selection Variante (Prix)</h3>
+            <table id="variants" border="1">
+            </table>
+        </div>
+        <div class="column">
+            <h3>Envoyer une image pour obtenir le document hash</h3>
+            <form id="upload" method="post" action="{{ path('app_document_upload') }}">
+                <input type="file" id="file" name="document" />*
+                <input type="submit" name="uploader" />
+            </form>
+            <form id="order" method="post" action="{{ path('app_order_create') }}">
+                <h3>Creation commande</h3>
+                <p><input type="email" name="customerEmail" placeholder="email" /></p>
+                <p><input type="text" name="externalCustomerId" placeholder="externalCustomerId" /></p>
+                <p><input type="text" name="productVariantId" id="variant" placeholder="id de la variante" required="required" />*</p>
+                <p><label>qté</label> <input type="number" name="quantity" placeholder="1" /></p>
+                <p><input type="text" name="documents[]" id="hash" placeholder="document hash" required="required" />*</p>
+                <p><label>livraison pro ?</label><input type="radio" name="professionalShipping" value="1" /></p>
+                <p>adresse de livraison</p>
+                <p><input type="text" name="shippingAddress[firstName]" placeholder="firstname" required="required" />*</p>
+                <p><input type="text" name="shippingAddress[lastName]" placeholder="lastname" required="required" />*</p>
+                <p><input type="text" name="shippingAddress[phoneNumber]" placeholder="phonenumber" required="required" />*</p>
+                <p><input type="text" name="shippingAddress[company]" placeholder="company" /></p>
+                <p><input type="text" name="shippingAddress[street]" placeholder="street" required="required" />*</p>
+                <p><input type="text" name="shippingAddress[postcode]" placeholder="zipcode" required="required" />*</p>
+                <p><input type="text" name="shippingAddress[city]" placeholder="city" required="required" />*</p>
+                <p>{% include '_country.html.twig' with {'inputName': 'shippingAddress[countryCode]'} %}</p>
+                <p><input type="submit" name="commander" /></p>
+            </form>
+        </div>
+    </div>
+    <script
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        $('form#steps').on('submit', function(e) {
+            const selectedOptionValues = document.querySelectorAll('#steps option:checked');
+            const inputs = document.querySelectorAll('#steps input[type=text]');
+            const optionValuesIds = [];
+            const userInputs = {};
+            const $form = $(this);
+            for (let i = 0; i < selectedOptionValues.length; i++) {
+                optionValuesIds.push(selectedOptionValues[i].value);
+            }
+            for (let i = 0; i < inputs.length; i++) {
+                userInputs[inputs[i].name] = inputs[i].value;
+            }
+            $('#variants').empty().append('<tr><td>Loading...</td></tr>');
+            $.get($form.attr('action'), { optionValueIds: optionValuesIds, inputs: userInputs})
+                .done(function(data) {
+                    let trHTML = '';
+                    $.each(data, function (i, variant) {
+                        trHTML += '<tr>';
+                        for (let i = 0; i < variant.optionValues.length; i++) {
+                            if (optionValuesIds.indexOf(variant.optionValues[i].id.toString()) === -1) {
+                                trHTML += '<td>' + variant.optionValues[i].option.code + ': ' + variant.optionValues[i].value + '</td>';
+                            }
+                        }
+                        if (variant.estimatedDeliveryDate) {
+                            trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toDateString() + '</td>';
+                        }
+                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a href="javascript:selectVariant('+variant.id+')" >select</a></td>';
+                        trHTML += '</tr>';
+                    });
+                    $('#variants').empty().append(trHTML);
+                })
+                .fail(function(error) {
+                    $('#variants').empty().append('<tr><td>Error getting variants.</td></tr>');
+                });
+            e.preventDefault();
+
+            return false;
+        });
+        $('form#upload').on('submit', function (e) {
+            e.preventDefault();
+            const $form = $(this);
+            let formData = new FormData();
+            formData.append('document', $('#file')[0].files[0]);
+
+            $.ajax({
+                url : $form.attr('action'),
+                type : 'POST',
+                data : formData,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                success : function(data) {
+                    $('#hash').val(data.hash);
+                }
+            });
+
+            return false;
+        });
+        $('form#order').on('submit', function (e) {
+            e.preventDefault();
+            const $form = $(this);
+            const formData = new FormData(e.target);
+            const $country = $('select.country option:selected', $form);
+            formData.append($('select.country', $form).attr('name'), $country.val());
+
+            $.ajax({
+                url: $form.attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                success: function(data) {
+                    console.log(data);
+                    alert('success order creation' + data.id);
+                },
+                error: function (e) {
+                    console.log(e);
+                    alert('error order creation');
+                }
+            });
+
+            return false;
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            areOptionValuesAllowed();
+        });
+        function areOptionValuesAllowed() {
+            const selects = document.querySelectorAll('select');
+            for (let indexSelect = 0; indexSelect < selects.length; indexSelect++) {
+                const select = selects[indexSelect];
+                const selectedOptionValues = document.querySelectorAll('option:checked');
+                const step = select.getAttribute('data-step-tree');
+                {% autoescape false %}
+                let treeIndex = {{ product.treeOptionValuesMapping|json_encode }};
+                {% endautoescape %}
+                let indexOptionSelection;
+                for (indexOptionSelection in selectedOptionValues) {
+                    if (selectedOptionValues[indexOptionSelection].value && indexOptionSelection < step) {
+                        treeIndex = treeIndex[selectedOptionValues[indexOptionSelection].value];
+                    } else {
+                        break;
+                    }
+                }
+
+                const optionValues = select.querySelectorAll('option');
+                for (let i = 0; i < optionValues.length; i++) {
+                    if (optionValues[i].value) {
+                        if (treeIndex && treeIndex[optionValues[i].value]) {
+                            optionValues[i].disabled = false;
+                        } else {
+                            optionValues[i].disabled = true;
+                        }
+                    }
+                }
+            }
+        }
+        function selectVariant(id) {
+            $('#variant').val(id);
+
+            return false;
+        }
+    </script>
+{% endblock %}
+{% block css %}
+    {{ parent() }}
+    <style type="text/css">
+        .column {
+            float: left;
+            width: 33%;
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
+{% endblock %}

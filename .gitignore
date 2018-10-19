@@ -1,0 +1,17 @@
+/.idea
+/.project
+/.bundle
+.DS_Store
+.DS_Store?
+
+###> symfony/framework-bundle ###
+/.env
+/public/bundles/
+/public/assets/
+/var/*
+!/var/.gitkeep
+/vendor/
+/bin/*
+!/bin/console
+###< symfony/framework-bundle ###
+

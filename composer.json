@@ -1,0 +1,26 @@
+{
+    "require": {
+        "guzzlehttp/guzzle": "^6.3",
+        "symfony/config": "^4.1",
+        "symfony/http-kernel": "^4.1",
+        "symfony/http-foundation": "^4.1",
+        "symfony/routing": "^4.1",
+        "symfony/dependency-injection": "^4.1",
+        "symfony/framework-bundle": "^4.1",
+        "doctrine/common": "^2.9",
+        "symfony/twig-bundle": "^4.1",
+        "symfony/yaml": "^4.1",
+        "symfony/templating": "^4.1",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "symfony/web-profiler-bundle": "^4.1",
+        "symfony/debug-bundle": "^4.1",
+        "symfony/console": "^4.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
