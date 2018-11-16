@@ -84,14 +84,12 @@
                 userInputs['dimensions'] = $inputHeight.val()+'x'+$inputWidth.val();
             }
             $('#variants').empty().append('<tr><td>Loading...</td></tr>');
-            $.get($form.attr('action'), { optionValueIds: optionValuesIds, inputs: userInputs})
+            $.get($form.attr('action'), { optionValueIds: optionValuesIds, userInputs: userInputs})
                 .done(function(data) {
-                    console.log(optionValuesIds);
                     let trHTML = '';
                     $.each(data, function (i, variant) {
                         trHTML += '<tr>';
                         for (let i = 0; i < variant.optionValues.length; i++) {
-                            console.log(variant.optionValues[i].id.toString());
                             if (optionValuesIds.indexOf(variant.optionValues[i].id.toString()) === -1) {
                                 trHTML += '<td>' + variant.optionValues[i].option.code + ': ' + variant.optionValues[i].value + '</td>';
                             }
@@ -117,13 +115,6 @@
             let formData = new FormData();
             formData.append('document', $('#file')[0].files[0]);
 
-            // Concatenate special case "dimensions".
-            const $inputHeight = $('form#steps input[name=dimensions_height]');
-            const $inputWidth = $('form#steps input[name=dimensions_width]');
-            if ($inputWidth && $inputHeight) {
-                formData.append('userInputs[dimensions]', $inputHeight.val()+'x'+$inputWidth.val());
-            }
-
             $.ajax({
                 url : $form.attr('action'),
                 type : 'POST',
@@ -143,6 +134,13 @@
             const formData = new FormData(e.target);
             const $country = $('select.country option:selected', $form);
             formData.append($('select.country', $form).attr('name'), $country.val());
+
+            // Concatenate special case "dimensions".
+            const $inputHeight = $('form#steps input[name=dimensions_height]');
+            const $inputWidth = $('form#steps input[name=dimensions_width]');
+            if ($inputWidth && $inputHeight) {
+                formData.append('userInputs[dimensions]', $inputHeight.val()+'x'+$inputWidth.val());
+            }
 
             $.ajax({
                 url: $form.attr('action'),
