@@ -1,28 +1,33 @@
 {
     "require": {
         "guzzlehttp/guzzle": "^6.3",
-        "symfony/config": "^4.1",
-        "symfony/http-kernel": "^4.1",
-        "symfony/http-foundation": "^4.1",
-        "symfony/routing": "^4.1",
-        "symfony/dependency-injection": "^4.1",
-        "symfony/framework-bundle": "^4.1",
-        "doctrine/common": "^2.9",
-        "symfony/twig-bundle": "^4.1",
-        "symfony/yaml": "^4.1",
-        "symfony/templating": "^4.1",
+        "symfony/config": "^3.4",
+        "symfony/http-kernel": "^3.4",
+        "symfony/http-foundation": "^3.4",
+        "symfony/routing": "^3.4",
+        "symfony/dependency-injection": "^3.4",
+        "symfony/framework-bundle": "^3.4",
+        "doctrine/common": "^2.7",
+        "symfony/twig-bundle": "^3.4",
+        "symfony/yaml": "^3.4",
+        "symfony/templating": "^3.4",
         "ext-json": "*",
         "symfony/monolog-bundle": "^3.3"
     },
     "require-dev": {
-        "symfony/web-profiler-bundle": "^4.1",
-        "symfony/debug-bundle": "^4.1",
-        "symfony/console": "^4.1",
+        "symfony/web-profiler-bundle": "^3.4",
+        "symfony/debug-bundle": "^3.4",
+        "symfony/console": "^3.4",
         "namshi/cuzzle": "^2.0"
     },
     "autoload": {
         "psr-4": {
             "App\\": "src/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "5.6.1"
         }
     }
 }
