@@ -4,8 +4,11 @@ namespace App\SDK;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
+use Namshi\Cuzzle\Middleware\CurlFormatterMiddleware;
+use Symfony\Bridge\Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -51,14 +54,18 @@ Class PrintoclockBAPI
      * @param string $login
      * @param string $password
      * @param string $version
+     * @param Logger $logger
      */
-    public function __construct($host, $login, $password, $version)
+    public function __construct($host, $login, $password, $version, Logger $logger)
     {
         $this->host = $host;
         $this->login = $login;
         $this->password = $password;
         $this->version = $version;
-        $this->client = new Client();
+
+        $handler = HandlerStack::create();
+        $handler->after('cookies', new CurlFormatterMiddleware($logger));
+        $this->client = new Client(['handler' => $handler]);
     }
 
     public function getToken()
@@ -139,6 +146,17 @@ Class PrintoclockBAPI
     public function createOrder($data)
     {
         $result = $this->request('post', '/orders', $data);
+
+        return $result;
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function getOrders()
+    {
+        $result = $this->request('get', '/orders');
 
         return $result;
     }

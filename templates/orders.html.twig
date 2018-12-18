@@ -1,0 +1,32 @@
+{% extends '_layout.html.twig' %}
+
+{% block title %}products{% endblock %}
+{% block content %}
+    <h1>orders:</h1>
+    <table border="1">
+        <tr>
+            <td>#id</td>
+            <td>state</td>
+            <td>items</td>
+            <td>total</td>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>
+                {{ order.id }}
+            </td>
+            <td>
+                {{ order.state }}
+            </td>
+            <td>
+                {% for item in order.items %}
+                    {{ item.productCode }}<br />
+                {% endfor %}
+            </td>
+            <td>
+                {{ order.total }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

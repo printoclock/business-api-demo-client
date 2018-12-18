@@ -1,5 +1,5 @@
 parameters:
-    b_api_host: 'https://sandbox.api.printoclock.com' # b_api_host: 'http://localhost:8888/business-api'
+    b_api_host: 'https://sandbox.api.printoclock.com'
     b_api_version: 'v1'
     b_api_login: 'test'
     b_api_password: 'test'
@@ -30,3 +30,4 @@ services:
             $login: '%b_api_login%'
             $password: '%b_api_password%'
             $version: '%b_api_version%'
+            $logger: '@logger'

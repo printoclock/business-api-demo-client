@@ -22,6 +22,7 @@ class Kernel extends BaseKernel
         $bundles = array(
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new \Symfony\Bundle\TwigBundle\TwigBundle(),
+            new \Symfony\Bundle\MonologBundle\MonologBundle(),
         );
 
         if ($this->getEnvironment() == 'dev') {
@@ -34,6 +35,7 @@ class Kernel extends BaseKernel
     protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
     {
         $loader->load(__DIR__.'/../config/framework.yaml');
+        $loader->load(__DIR__.'/../config/monolog.yaml');
         $loader->load(__DIR__.'/../config/services.yaml');
 
         // configure WebProfilerBundle only if the bundle is enabled
