@@ -48,18 +48,18 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/products/{productId}/variants")
+     * @Route("/products/{productCode}/variants")
      *
      * @param Request $request
-     * @param int $productId
+     * @param string $productCode
      * @return JsonResponse
      * @throws \Exception
      */
-    public function getVariantsAction(Request $request, $productId)
+    public function getVariantsAction(Request $request, $productCode)
     {
-        $optionValueIds = $request->get('optionValueIds');
+        $optionValueCodes = $request->get('optionValueCodes');
         $userInputs = $request->get('userInputs');
 
-        return new JsonResponse($this->businessApiClient->getProductVariants($productId, $optionValueIds, $userInputs));
+        return new JsonResponse($this->businessApiClient->getProductVariants($productCode, $optionValueCodes, $userInputs));
     }
 }

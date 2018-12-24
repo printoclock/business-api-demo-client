@@ -103,25 +103,25 @@ Class PrintoclockBAPI
     }
 
     /**
-     * @param int $productId
-     * @param array $optionValueIds
+     * @param string $productCode
+     * @param array $optionValueCodes
      * @param array $userInputs
      * @param string $countryCode
      * @param string|null $postCode
      * @return string
      * @throws \Exception
      */
-    public function getProductVariants($productId, $optionValueIds, $userInputs = array(), $countryCode = 'FR', $postCode = null)
+    public function getProductVariants($productCode, $optionValueCodes, $userInputs = array(), $countryCode = 'FR', $postCode = null)
     {
         $params = [
-            'optionValueIds' => $optionValueIds,
+            'optionValueCodes' => $optionValueCodes,
             'userInputs' => $userInputs,
             'countryCode' => $countryCode,
         ];
         if ($postCode) {
             $params['postCode'] = $postCode;
         }
-        $result = $this->request('get', '/products/' . $productId . '/variants', $params);
+        $result = $this->request('get', '/products/' . $productCode . '/variants', $params);
 
         return $result;
     }
@@ -197,7 +197,7 @@ Class PrintoclockBAPI
         /** @var Response $response */
         try {
             $response = $this->client->$method($url, $params);
-            $result = json_decode($response->getBody()->getContents());
+            $result = json_decode($response->getBody()->getContents(), true);
 
             return $result;
         } catch (RequestException $e) {

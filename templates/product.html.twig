@@ -6,11 +6,12 @@
     {% set stepTree = 0 %}
     <div class="row>">
          <div class="column">
-            <form id="steps" name="product" action="{{ path('app_product_getvariants', {'productId': product.id}) }}">
+            <form id="steps" name="product" action="{{ path('app_product_getvariants', {'productCode': product.code}) }}">
             {% for option in product.stepsOptions %}
                 <h3>{{ option.productOption.name }}</h3>
+                <p>
                     {# specific dimensions option #}
-                    {# API is waiting for heightxwidth value, #}
+                    {# API is waiting for heightxwidth value #}
                     {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
                     {% if option.userInput == 'dimensions' %}
                         <input name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
@@ -21,8 +22,8 @@
                         {# other normal cases #}
                         <select name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
                             <option></option>
-                            {% for optionValue in option.optionValues %}
-                                <option value="{{ optionValue.id }}">{{ optionValue.value }}</option>
+                            {% for code, value in option.allowedValues %}
+                                <option value="{{ code }}">{{ value }}</option>
                             {% endfor %}
                         </select>*
                     {% endif %}
@@ -47,7 +48,7 @@
                 <h3>Creation commande</h3>
                 <p><input type="email" name="customerEmail" placeholder="email" /></p>
                 <p><input type="text" name="externalCustomerId" placeholder="externalCustomerId" /></p>
-                <p><input type="text" name="productVariantId" id="variant" placeholder="id de la variante" required="required" />*</p>
+                <p><input type="text" name="productVariantCode" id="variant" placeholder="code de la variante" required="required" />*</p>
                 <p><label>qté</label> <input type="number" name="quantity" placeholder="1" /></p>
                 <p><input type="text" name="documents[]" id="hash" placeholder="document hash" required="required" />*</p>
                 <p><label>livraison pro ?</label><input type="radio" name="professionalShipping" value="1" /></p>
@@ -71,33 +72,33 @@
     <script type="text/javascript">
         $('form#steps').on('submit', function(e) {
             const selectedOptionValues = document.querySelectorAll('#steps option:checked');
-            const optionValuesIds = [];
+            const optionValueCodes = [];
             const userInputs = {};
             const $form = $(this);
             for (let i = 0; i < selectedOptionValues.length; i++) {
-                optionValuesIds.push(selectedOptionValues[i].value);
+                optionValueCodes.push(selectedOptionValues[i].value);
             }
             // Concatenate special case "dimensions".
             const $inputHeight = $('form#steps input[name=dimensions_height]');
             const $inputWidth = $('form#steps input[name=dimensions_width]');
-            if ($inputWidth && $inputHeight) {
+            if ($inputWidth.length && $inputHeight.length) {
                 userInputs['dimensions'] = $inputHeight.val()+'x'+$inputWidth.val();
             }
             $('#variants').empty().append('<tr><td>Loading...</td></tr>');
-            $.get($form.attr('action'), { optionValueIds: optionValuesIds, userInputs: userInputs})
+            $.get($form.attr('action'), { optionValueCodes: optionValueCodes, userInputs: userInputs})
                 .done(function(data) {
                     let trHTML = '';
                     $.each(data, function (i, variant) {
                         trHTML += '<tr>';
                         for (let i = 0; i < variant.optionValues.length; i++) {
-                            if (optionValuesIds.indexOf(variant.optionValues[i].id.toString()) === -1) {
+                            if (optionValueCodes.indexOf(variant.optionValues[i].code.toString()) === -1) {
                                 trHTML += '<td>' + variant.optionValues[i].option.code + ': ' + variant.optionValues[i].value + '</td>';
                             }
                         }
                         if (variant.estimatedDeliveryDate) {
                             trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toDateString() + '</td>';
                         }
-                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a href="javascript:selectVariant('+variant.id+')" >select</a></td>';
+                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a href="javascript:selectVariant('+variant.code+')" >select</a></td>';
                         trHTML += '</tr>';
                     });
                     $('#variants').empty().append(trHTML);
@@ -138,7 +139,7 @@
             // Concatenate special case "dimensions".
             const $inputHeight = $('form#steps input[name=dimensions_height]');
             const $inputWidth = $('form#steps input[name=dimensions_width]');
-            if ($inputWidth && $inputHeight) {
+            if ($inputWidth.length && $inputHeight.length) {
                 formData.append('userInputs[dimensions]', $inputHeight.val()+'x'+$inputWidth.val());
             }
 
@@ -193,8 +194,8 @@
                 }
             }
         }
-        function selectVariant(id) {
-            $('#variant').val(id);
+        function selectVariant(code) {
+            $('#variant').val(code);
 
             return false;
         }
