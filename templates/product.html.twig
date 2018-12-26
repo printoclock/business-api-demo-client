@@ -98,7 +98,7 @@
                         if (variant.estimatedDeliveryDate) {
                             trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toDateString() + '</td>';
                         }
-                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a href="javascript:selectVariant('+variant.code+')" >select</a></td>';
+                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a href="javascript:selectVariant(\''+variant.code+'\')" >select</a></td>';
                         trHTML += '</tr>';
                     });
                     $('#variants').empty().append(trHTML);
