@@ -22,8 +22,8 @@
                         {# other normal cases #}
                         <select name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
                             <option></option>
-                            {% for code, value in option.allowedValues %}
-                                <option value="{{ code }}">{{ value }}</option>
+                            {% for allowedValue in option.allowedValues %}
+                                <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
                             {% endfor %}
                         </select>*
                     {% endif %}
