@@ -62,4 +62,17 @@ class ProductController extends AbstractController
 
         return new JsonResponse($this->businessApiClient->getProductVariants($productCode, $optionValueCodes, $userInputs));
     }
+
+    /**
+     * @Route("/variants/{variantCode}")
+     *
+     * @param Request $request
+     * @param string $variantCode
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function getVariantAction(Request $request, $variantCode)
+    {
+        return new JsonResponse($this->businessApiClient->getVariant($variantCode));
+    }
 }

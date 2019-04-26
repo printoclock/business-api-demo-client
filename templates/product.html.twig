@@ -4,8 +4,9 @@
 {% block content %}
     <h1>produit {{ product.name }} - {{ product.code }}</h1>
     {% set stepTree = 0 %}
-    <div class="row>">
+    <div class="row">
          <div class="column">
+             <h3>Etape 1: selection valeurs d'options</h3>
             <form id="steps" name="product" action="{{ path('app_product_getvariants', {'productCode': product.code}) }}">
             {% for option in product.stepsOptions %}
                 <h3>{{ option.productOption.name }}</h3>
@@ -34,18 +35,20 @@
             </form>
          </div>
         <div class="column">
-            <h3>Selection Variante (Prix)</h3>
+            <h3>Etape 2: selection Variante (Prix)</h3>
             <table id="variants" border="1">
             </table>
         </div>
+    </div>
+    <div class="row>">
         <div class="column">
-            <h3>Envoyer une image pour obtenir le document hash</h3>
+            <h3>Etape 3: Envoyer une image pour obtenir le document hash</h3>
             <form id="upload" method="post" action="{{ path('app_document_upload') }}">
                 <input type="file" id="file" name="document" />*
                 <input type="submit" name="uploader" />
             </form>
             <form id="order" method="post" action="{{ path('app_order_create') }}">
-                <h3>Creation commande</h3>
+                <h3>Etape 4: Creation commande</h3>
                 <p><input type="email" name="customerEmail" placeholder="email" /></p>
                 <p><input type="text" name="externalCustomerId" placeholder="externalCustomerId" /></p>
                 <p><input type="text" name="productVariantCode" id="variant" placeholder="code de la variante" required="required" />*</p>
@@ -96,9 +99,11 @@
                             }
                         }
                         if (variant.estimatedDeliveryDate) {
-                            trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toDateString() + '</td>';
+                            trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toString() + '</td>';
                         }
-                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a href="javascript:selectVariant(\''+variant.code+'\')" >select</a></td>';
+
+                        trHTML += '<td><a href="javascript:void" onclick="window.open(\'{{ path('app_product_getvariant', {'variantCode': 'CODE'}) }}\'.replace(\'CODE\', this.innerText))">' + variant.code + '</a><br />voir la variante</td>';
+                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a href="javascript:selectVariant(\''+variant.code+'\')" >choisir cette variante</a></td>';
                         trHTML += '</tr>';
                     });
                     $('#variants').empty().append(trHTML);

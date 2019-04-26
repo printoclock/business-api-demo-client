@@ -103,6 +103,18 @@ Class PrintoclockBAPI
     }
 
     /**
+     * @param string $code
+     * @return string
+     * @throws \Exception
+     */
+    public function getVariant($code)
+    {
+        $result = $this->request('get', '/variants/' . $code);
+
+        return $result;
+    }
+
+    /**
      * @param string $productCode
      * @param array $optionValueCodes
      * @param array $userInputs
