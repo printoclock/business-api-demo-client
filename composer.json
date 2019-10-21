@@ -1,4 +1,10 @@
 {
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/printoclock/cuzzle.git"
+        }
+    ],
     "require": {
         "guzzlehttp/guzzle": "^6.3",
         "symfony/config": "^3.4",
