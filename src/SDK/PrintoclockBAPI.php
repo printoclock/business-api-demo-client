@@ -4,10 +4,7 @@ namespace App\SDK;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\RequestOptions;
-use Namshi\Cuzzle\Middleware\CurlFormatterMiddleware;
+use GuzzleHttp\Post\PostFile;
 use Symfony\Bridge\Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -63,16 +60,14 @@ Class PrintoclockBAPI
         $this->password = $password;
         $this->version = $version;
 
-        $handler = HandlerStack::create();
-        $handler->after('cookies', new CurlFormatterMiddleware($logger));
-        $this->client = new Client(['handler' => $handler]);
+        $this->client = new Client();
     }
 
     public function getToken()
     {
         $url = $this->host . '/login_check';
-        $data = ['username' => $this->login, 'password' => $this->password];
-        $response = $this->client->post($url, array(RequestOptions::JSON => $data));
+        $data = array('username' => $this->login, 'password' => $this->password);
+        $response = $this->client->post($url, array('json' => $data));
         $result = json_decode($response->getBody()->getContents());
         $this->accessToken = $result->token;
 
@@ -192,23 +187,21 @@ Class PrintoclockBAPI
             throw new \Exception('bad request method');
         }
         $headers = array('Authorization' => 'Bearer ' . $this->accessToken);
-
         $params = array(
             'headers' => $headers,
-            RequestOptions::QUERY => $method === 'get' ? $data : array(),
+            'query' => $method === 'get' ? $data : array(),
+            'body' => $method === 'post' ? $data : array(),
         );
-        if (!$filesPath) {
-            $params[RequestOptions::FORM_PARAMS] = $method !== 'get' ? $data : array();
-        }
+
+        $request = $this->client->createRequest($method, $url, $params);
+
+        $body = $request->getBody();
         foreach ($filesPath as $inputName => $filePath) {
-            $params['multipart'][] = array(
-                'name' => $inputName,
-                'contents' => fopen($filePath, 'r'),
-            );
+            $body->addFile(new PostFile($inputName, fopen($filePath, 'r')));
         }
-        /** @var Response $response */
+
         try {
-            $response = $this->client->$method($url, $params);
+            $response = $this->client->send($request);
             $result = json_decode($response->getBody()->getContents(), true);
 
             return $result;
