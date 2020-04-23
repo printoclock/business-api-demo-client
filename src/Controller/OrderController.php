@@ -45,8 +45,15 @@ class OrderController extends AbstractController
      */
     public function indexAction(Request $request)
     {
+        $page = (int) $request->query->get('page', 1);
+        $limit = (int) $request->query->get('limit', PrintoclockBAPI::DEFAULT_PAGE_LIMIT);
+        $response = $this->businessApiClient->getOrders($page, $limit);
+        $orders = json_decode($response->getBody()->getContents(), true);
+        $availableLinks = $this->businessApiClient->getLinksFromResponse($response);
+
         return $this->render('orders.html.twig', array(
-            'orders' => $this->businessApiClient->getOrders(),
+            'orders' => $orders,
+            'links' => $availableLinks,
         ));
     }
 }

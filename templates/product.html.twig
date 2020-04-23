@@ -38,6 +38,7 @@
             <h3>Etape 2: selection Variante (Prix)</h3>
             <table id="variants" border="1">
             </table>
+            <div id="links"></div>
         </div>
     </div>
     <div class="row>">
@@ -86,12 +87,12 @@
             const $inputWidth = $('form#steps input[name=dimensions_width]');
             if ($inputWidth.length && $inputHeight.length) {
                 userInputs['dimensions'] = $inputHeight.val()+'x'+$inputWidth.val();
-            }
+                }
             $('#variants').empty().append('<tr><td>Loading...</td></tr>');
             $.get($form.attr('action'), { optionValueCodes: optionValueCodes, userInputs: userInputs})
                 .done(function(data) {
                     let trHTML = '';
-                    $.each(data, function (i, variant) {
+                    $.each(data.variants, function (i, variant) {
                         trHTML += '<tr>';
                         for (let i = 0; i < variant.optionValues.length; i++) {
                             if (optionValueCodes.indexOf(variant.optionValues[i].code.toString()) === -1) {
@@ -107,10 +108,17 @@
                         trHTML += '</tr>';
                     });
                     $('#variants').empty().append(trHTML);
+                    let linksHTML = '';
+                    $.each(data.links, function (linkType, linkParams) {
+                        const linkParamsUrl = $.param(linkParams);
+                        linksHTML += '<a href="javascript:void" onclick="' + "$('form#steps').attr('action', $('form#steps').attr('action') +'?"+linkParamsUrl+"'); $('form#steps').submit();" + '">' + linkType + '</a><br />';
+                    });
+                    $('#links').empty().append(linksHTML);
                 })
                 .fail(function(error) {
                     $('#variants').empty().append('<tr><td>Error getting variants.</td></tr>');
                 });
+            $form.attr('action', $form.attr('action').split('?')[0]);
             e.preventDefault();
 
             return false;
