@@ -9,45 +9,47 @@
              <h3>Etape 1: selection valeurs d'options</h3>
             <form id="steps" name="product" action="{{ path('app_product_getvariants', {'productCode': product.code}) }}">
             {% for option in product.stepsOptions %}
-                <h3>{{ option.name }}</h3>
-                <p>
-                    {# specific dimensions option #}
-                    {# API is waiting for heightxwidth value #}
-                    {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
-                    {% if option.userInput == 'dimensions' %}
-                        <input name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
-                        <input name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
-                        {# optional: you can use option.validations array to do height/min js validation #}
-                        {# or the API will return an error if input is incorrect #}
-                    {% else %}
-                        {# specific quantity option #}
-                        {% if option.productOption.code == 'quantity' %}
-                            {% if option.allowedValues|length %}
-                            <select name="userInputs[{{ option.productOption.code }}]" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
-                                <option></option>
-                                {% for allowedValue in option.allowedValues %}
-                                    <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
-                                {% endfor %}
-                            </select>*
-                            {% endif %}
-                            {% if not disableCustomQuantity %}
-                                <p>personnalisée</p>
-                                <input name="userInputs[{{ option.productOption.code }}]" data-option="{{ option.productOption.code }}" type="text" />
-                                {# optional: you can use option.validations array to do height/min js validation #}
-                                {# or the API will return an error if input is incorrect #}
-                            {% endif %}
-                        {# other normal cases #}
+                {% if not option.hide %}
+                    <h3>{{ option.name }}</h3>
+                    <p>
+                        {# specific dimensions option #}
+                        {# API is waiting for heightxwidth value #}
+                        {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
+                        {% if option.userInput == 'dimensions' %}
+                            <input name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
+                            <input name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
+                            {# optional: you can use option.validations array to do height/min js validation #}
+                            {# or the API will return an error if input is incorrect #}
                         {% else %}
-                            <select name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
-                                <option></option>
-                                {% for allowedValue in option.allowedValues %}
-                                    <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
-                                {% endfor %}
-                            </select>*
+                            {# specific quantity option #}
+                            {% if option.productOption.code == 'quantity' %}
+                                {% if option.allowedValues|length %}
+                                <select name="userInputs[{{ option.productOption.code }}]" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                                    <option></option>
+                                    {% for allowedValue in option.allowedValues %}
+                                        <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
+                                    {% endfor %}
+                                </select>*
+                                {% endif %}
+                                {% if not disableCustomQuantity %}
+                                    <p>personnalisée</p>
+                                    <input name="userInputs[{{ option.productOption.code }}]" data-option="{{ option.productOption.code }}" type="text" />
+                                    {# optional: you can use option.validations array to do height/min js validation #}
+                                    {# or the API will return an error if input is incorrect #}
+                                {% endif %}
+                            {# other normal cases #}
+                            {% else %}
+                                <select name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                                    <option></option>
+                                    {% for allowedValue in option.allowedValues %}
+                                        <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
+                                    {% endfor %}
+                                </select>*
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                </p>
-                {% set stepTree = stepTree + 1 %}
+                    </p>
+                    {% set stepTree = stepTree + 1 %}
+                {% endif %}
             {% endfor %}
                 <input type="submit" name="get variants price" />
             </form>
