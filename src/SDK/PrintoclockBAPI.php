@@ -4,6 +4,7 @@ namespace App\SDK;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Message\Response;
 use GuzzleHttp\Post\PostFile;
 use Symfony\Bridge\Monolog\Logger;
 use Symfony\Component\HttpFoundation\File\File;
@@ -14,6 +15,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 Class PrintoclockBAPI
 {
+    const DEFAULT_PAGE_LIMIT = 25;
+
     /**
      * @var Client
      */
@@ -75,12 +78,14 @@ Class PrintoclockBAPI
     }
 
     /**
-     * @return string
+     * @param int $page
+     * @param int $limit
+     * @return Response
      * @throws \Exception
      */
-    public function getProducts()
+    public function getProducts($page = 1, $limit = self::DEFAULT_PAGE_LIMIT)
     {
-        $result = $this->request('get', '/products');
+        $result = $this->request('get', '/products', array('page' => $page, 'limit' => $limit));
 
         return $result;
     }
@@ -92,7 +97,8 @@ Class PrintoclockBAPI
      */
     public function getProduct($code)
     {
-        $result = $this->request('get', '/products/' . $code);
+        $response = $this->request('get', '/products/' . $code);
+        $result = json_decode($response->getBody()->getContents(), true);
 
         return $result;
     }
@@ -104,7 +110,8 @@ Class PrintoclockBAPI
      */
     public function getVariant($code)
     {
-        $result = $this->request('get', '/variants/' . $code);
+        $response = $this->request('get', '/variants/' . $code);
+        $result = json_decode($response->getBody()->getContents(), true);
 
         return $result;
     }
@@ -115,15 +122,19 @@ Class PrintoclockBAPI
      * @param array $userInputs
      * @param string $countryCode
      * @param string|null $postCode
-     * @return string
+     * @param int $page
+     * @param int $limit
+     * @return Response
      * @throws \Exception
      */
-    public function getProductVariants($productCode, $optionValueCodes, $userInputs = array(), $countryCode = 'FR', $postCode = null)
+    public function getProductVariants($productCode, $optionValueCodes, $userInputs = array(), $countryCode = 'FR', $postCode = null, $page = 1, $limit = self::DEFAULT_PAGE_LIMIT)
     {
         $params = [
             'optionValueCodes' => $optionValueCodes,
             'userInputs' => $userInputs,
             'countryCode' => $countryCode,
+            'page' => $page,
+            'limit' => $limit,
         ];
         if ($postCode) {
             $params['postCode'] = $postCode;
@@ -140,7 +151,8 @@ Class PrintoclockBAPI
      */
     public function uploadDocument(File $file)
     {
-        $result = $this->request('post', '/documents', array(), array('file' => $file->getRealPath()));
+        $response = $this->request('post', '/documents', array(), array('file' => $file->getRealPath()));
+        $result = json_decode($response->getBody()->getContents(), true);
 
         return $result;
     }
@@ -152,20 +164,45 @@ Class PrintoclockBAPI
      */
     public function createOrder($data)
     {
-        $result = $this->request('post', '/orders', $data);
+        $response = $this->request('post', '/orders', $data);
+        $result = json_decode($response->getBody()->getContents(), true);
 
         return $result;
     }
 
     /**
-     * @return string
+     * @param int $page
+     * @param int $limit
+     * @return Response
      * @throws \Exception
      */
-    public function getOrders()
+    public function getOrders($page = 1, $limit = self::DEFAULT_PAGE_LIMIT)
     {
-        $result = $this->request('get', '/orders');
+        $result = $this->request('get', '/orders', array('page' => $page, 'limit' => $limit));
 
         return $result;
+    }
+
+    /**
+     * @param Response $response
+     * @return array
+     */
+    public function getLinksFromResponse($response)
+    {
+        $headerLink = $response->getHeader('Link');
+        $availableLinks = array();
+        if ($headerLink) {
+            $links = explode(',', $headerLink);
+            foreach ($links as $link) {
+                if (preg_match('/<(.*)>;\srel=\\"(.*)\\"/', $link, $matches)) {
+                    $queryStr = parse_url($matches[1], PHP_URL_QUERY);
+                    parse_str($queryStr, $queryParams);
+                    $availableLinks[$matches[2]] = $queryParams;
+                }
+            }
+        }
+
+        return $availableLinks;
     }
 
     /**
@@ -173,7 +210,7 @@ Class PrintoclockBAPI
      * @param string $endpoint
      * @param array $data
      * @param array $filesPath
-     * @return string
+     * @return Response
      * @throws \Exception|RequestException
      */
     protected function request($method, $endpoint, $data = array(), $filesPath = array())
@@ -202,12 +239,11 @@ Class PrintoclockBAPI
 
         try {
             $response = $this->client->send($request);
-            $result = json_decode($response->getBody()->getContents(), true);
 
-            return $result;
+            return $response;
         } catch (RequestException $e) {
             if ($e->getCode() === 400) {
-                throw new BadRequestHttpException($e->getMessage());
+                throw new BadRequestHttpException($e->getMessage() . ' ' . $e->getResponse()->getBody()->getContents());
             }
 
             throw $e;

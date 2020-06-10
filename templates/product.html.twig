@@ -9,27 +9,47 @@
              <h3>Etape 1: selection valeurs d'options</h3>
             <form id="steps" name="product" action="{{ path('app_product_getvariants', {'productCode': product.code}) }}">
             {% for option in product.stepsOptions %}
-                <h3>{{ option.productOption.name }}</h3>
-                <p>
-                    {# specific dimensions option #}
-                    {# API is waiting for heightxwidth value #}
-                    {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
-                    {% if option.userInput == 'dimensions' %}
-                        <input name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
-                        <input name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
-                        {# optional: you can use option.validations array to do height/min js validation #}
-                        {# or the API will return an error if input is incorrect #}
-                    {% else %}
-                        {# other normal cases #}
-                        <select name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
-                            <option></option>
-                            {% for allowedValue in option.allowedValues %}
-                                <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
-                            {% endfor %}
-                        </select>*
-                    {% endif %}
-                </p>
-                {% set stepTree = stepTree + 1 %}
+                {% if not option.hide %}
+                    <h3>{{ option.name }}</h3>
+                    <p>
+                        {# specific dimensions option #}
+                        {# API is waiting for heightxwidth value #}
+                        {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
+                        {% if option.userInput == 'dimensions' %}
+                            <input name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
+                            <input name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
+                            {# optional: you can use option.validations array to do height/min js validation #}
+                            {# or the API will return an error if input is incorrect #}
+                        {% else %}
+                            {# specific quantity option #}
+                            {% if option.productOption.code == 'quantity' %}
+                                {% if option.allowedValues|length %}
+                                <select name="userInputs[{{ option.productOption.code }}]" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                                    <option></option>
+                                    {% for allowedValue in option.allowedValues %}
+                                        <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
+                                    {% endfor %}
+                                </select>*
+                                {% endif %}
+                                {% if not disableCustomQuantity %}
+                                    <p>personnalisée</p>
+                                    <input name="userInputs[{{ option.productOption.code }}]" data-option="{{ option.productOption.code }}" type="text" />
+                                    {# optional: you can use option.validations array to do height/min js validation #}
+                                    {# or the API will return an error if input is incorrect #}
+                                {% endif %}
+                            {# other normal cases #}
+                            {% else %}
+                                <select name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                                    <option></option>
+                                    {% for allowedValue in option.allowedValues %}
+                                        <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
+                                    {% endfor %}
+                                </select>*
+                            {% endif %}
+                        {% endif %}
+                    </p>
+                    {% set stepTree = stepTree + 1 %}
+                {% endif %}
             {% endfor %}
                 <input type="submit" name="get variants price" />
             </form>
@@ -38,6 +58,7 @@
             <h3>Etape 2: selection Variante (Prix)</h3>
             <table id="variants" border="1">
             </table>
+            <div id="links"></div>
         </div>
     </div>
     <div class="row>">
@@ -52,7 +73,6 @@
                 <p><input type="email" name="customerEmail" placeholder="email" /></p>
                 <p><input type="text" name="externalCustomerId" placeholder="externalCustomerId" /></p>
                 <p><input type="text" name="productVariantCode" id="variant" placeholder="code de la variante" required="required" />*</p>
-                <p><label>qté</label> <input type="number" name="quantity" placeholder="1" /></p>
                 <p><input type="text" name="documents[]" id="hash" placeholder="document hash" required="required" />*</p>
                 <p><label>livraison pro ?</label><input type="radio" name="professionalShipping" value="1" /></p>
                 <p>adresse de livraison</p>
@@ -74,27 +94,34 @@
             crossorigin="anonymous"></script>
     <script type="text/javascript">
         $('form#steps').on('submit', function(e) {
+            e.preventDefault();
             const selectedOptionValues = document.querySelectorAll('#steps option:checked');
-            const optionValueCodes = [];
-            const userInputs = {};
+            const userInputsForm = document.querySelectorAll('#steps input[name*="userInputs"]');
+            let dataForm = {};
+            dataForm['optionValueCodes'] = [];
             const $form = $(this);
             for (let i = 0; i < selectedOptionValues.length; i++) {
-                optionValueCodes.push(selectedOptionValues[i].value);
+                dataForm['optionValueCodes'].push(selectedOptionValues[i].value);
+            }
+            for (let i = 0; i < userInputsForm.length; i++) {
+                if (userInputsForm[i].value) {
+                    dataForm[userInputsForm[i].name] = userInputsForm[i].value;
+                }
             }
             // Concatenate special case "dimensions".
             const $inputHeight = $('form#steps input[name=dimensions_height]');
             const $inputWidth = $('form#steps input[name=dimensions_width]');
             if ($inputWidth.length && $inputHeight.length) {
-                userInputs['dimensions'] = $inputHeight.val()+'x'+$inputWidth.val();
+                dataForm['userInputs[dimensions]'] = $inputHeight.val()+'x'+$inputWidth.val();
             }
             $('#variants').empty().append('<tr><td>Loading...</td></tr>');
-            $.get($form.attr('action'), { optionValueCodes: optionValueCodes, userInputs: userInputs})
+            $.get($form.attr('action'), dataForm)
                 .done(function(data) {
                     let trHTML = '';
-                    $.each(data, function (i, variant) {
+                    $.each(data.variants, function (i, variant) {
                         trHTML += '<tr>';
                         for (let i = 0; i < variant.optionValues.length; i++) {
-                            if (optionValueCodes.indexOf(variant.optionValues[i].code.toString()) === -1) {
+                            if (dataForm['optionValueCodes'].indexOf(variant.optionValues[i].code.toString()) === -1) {
                                 trHTML += '<td>' + variant.optionValues[i].option.code + ': ' + variant.optionValues[i].value + '</td>';
                             }
                         }
@@ -107,11 +134,17 @@
                         trHTML += '</tr>';
                     });
                     $('#variants').empty().append(trHTML);
+                    let linksHTML = '';
+                    $.each(data.links, function (linkType, linkParams) {
+                        const linkParamsUrl = $.param(linkParams);
+                        linksHTML += '<a href="javascript:void" onclick="' + "$('form#steps').attr('action', $('form#steps').attr('action') +'?"+linkParamsUrl+"'); $('form#steps').submit();" + '">' + linkType + '</a><br />';
+                    });
+                    $('#links').empty().append(linksHTML);
                 })
                 .fail(function(error) {
                     $('#variants').empty().append('<tr><td>Error getting variants.</td></tr>');
                 });
-            e.preventDefault();
+            $form.attr('action', $form.attr('action').split('?')[0]);
 
             return false;
         });

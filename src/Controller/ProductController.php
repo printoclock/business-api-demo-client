@@ -23,13 +23,21 @@ class ProductController extends AbstractController
     /**
      * @Route("/")
      *
+     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function listAction()
+    public function listAction(Request $request)
     {
+        $page = (int) $request->query->get('page', 1);
+        $limit = (int) $request->query->get('limit', PrintoclockBAPI::DEFAULT_PAGE_LIMIT);
+        $response = $this->businessApiClient->getProducts($page, $limit);
+        $products = json_decode($response->getBody()->getContents(), true);
+        $availableLinks = $this->businessApiClient->getLinksFromResponse($response);
+
         return $this->render('products.html.twig', array(
-            'products' => $this->businessApiClient->getProducts(),
+            'products' => $products,
+            'links' => $availableLinks,
         ));
     }
 
@@ -59,8 +67,16 @@ class ProductController extends AbstractController
     {
         $optionValueCodes = $request->get('optionValueCodes');
         $userInputs = $request->get('userInputs');
+        $page = (int) $request->query->get('page', 1);
+        $limit = (int) $request->query->get('limit', PrintoclockBAPI::DEFAULT_PAGE_LIMIT);
+        $response = $this->businessApiClient->getProductVariants($productCode, $optionValueCodes, $userInputs, 'FR', null, $page, $limit);
+        $variants = json_decode($response->getBody()->getContents(), true);
+        $availableLinks = $this->businessApiClient->getLinksFromResponse($response);
 
-        return new JsonResponse($this->businessApiClient->getProductVariants($productCode, $optionValueCodes, $userInputs));
+        return new JsonResponse(array(
+            'variants' => $variants,
+            'links' => $availableLinks,
+        ));
     }
 
     /**

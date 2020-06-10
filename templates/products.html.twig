@@ -6,4 +6,7 @@
     {% for product in products %}
         <h3><a href="{{ path('app_product_get', {'code': product.code}) }}">{{ product.name }}</a></h3>
     {% endfor %}
+    {% for linkType, linkParams in links %}
+        <a href="{{ path('app_product_list', linkParams) }}">{{ linkType }}</a><br />
+    {% endfor %}
 {% endblock %}
