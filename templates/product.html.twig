@@ -2,92 +2,198 @@
 
 {% block title %}produit {{ product.name }}{% endblock %}
 {% block content %}
-    <h1>produit {{ product.name }} - {{ product.code }}</h1>
+    <h1>
+        {{ product.name }}
+        <small class="text-muted">{{ product.code }}</small>
+    </h1>
     {% set stepTree = 0 %}
     <div class="row">
-         <div class="column">
-             <h3>Etape 1: selection valeurs d'options</h3>
+        <div class="col-4">
+            <h3>Images</h3>
+            <div class="row">
+                {% if product.images %}
+                {% for image in product.images %}
+                    <img class="img-fluid img-thumbnail col-6" src="{{image.path}}" />
+                {% endfor %}
+                {% else %}
+                    No image
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col">
+                <h3>Description</h3>
+                <p>
+                {% if product.apiDescription %}
+                    {{ product.apiDescription|raw }}
+                {% else %}
+                    No description
+                {% endif %}
+                </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+             <h2>Step 1 : Select options</h2>
             <form id="steps" name="product" action="{{ path('app_product_getvariants', {'productCode': product.code}) }}">
             {% for option in product.stepsOptions %}
                 {% if not option.hide %}
-                    <h3>{{ option.name }}</h3>
-                    <p>
-                        {# specific dimensions option #}
-                        {# API is waiting for heightxwidth value #}
-                        {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
-                        {% if option.userInput == 'dimensions' %}
-                            <input name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
-                            <input name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
-                            {# optional: you can use option.validations array to do height/min js validation #}
-                            {# or the API will return an error if input is incorrect #}
-                        {% else %}
-                            {# specific quantity option #}
-                            {% if option.productOption.code == 'quantity' %}
-                                {% if option.allowedValues|length %}
-                                <select name="userInputs[{{ option.productOption.code }}]" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
-                                    <option></option>
-                                    {% for allowedValue in option.allowedValues %}
-                                        <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
-                                    {% endfor %}
-                                </select>*
-                                {% endif %}
-                                {% if not disableCustomQuantity %}
-                                    <p>personnalisée</p>
-                                    <input name="userInputs[{{ option.productOption.code }}]" data-option="{{ option.productOption.code }}" type="text" />
-                                    {# optional: you can use option.validations array to do height/min js validation #}
-                                    {# or the API will return an error if input is incorrect #}
-                                {% endif %}
-                            {# other normal cases #}
+                    <div class="form-group">
+                        <label for="form_{{ option.productOption.code }}">{{ option.name }}</label>
+                            {# specific dimensions option #}
+                            {# API is waiting for heightxwidth value #}
+                            {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
+                            {% if option.userInput == 'dimensions' %}
+                                <input class="form-control" id="form_{{ option.productOption.code }}" name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
+                                <input class="form-control" name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
+                                {# optional: you can use option.validations array to do height/min js validation #}
+                                {# or the API will return an error if input is incorrect #}
                             {% else %}
-                                <select name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
-                                    <option></option>
-                                    {% for allowedValue in option.allowedValues %}
-                                        <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
-                                    {% endfor %}
-                                </select>*
+                                {# specific quantity option #}
+                                {% if option.productOption.code == 'quantity' %}
+                                    {% if option.allowedValues|length %}
+                                    <select class="form-control" name="userInputs[{{ option.productOption.code }}]" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                                        <option></option>
+                                        {% for allowedValue in option.allowedValues %}
+                                            <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% endif %}
+                                    {% if not disableCustomQuantity %}
+                                        </div>
+                                        <div class="form-group">
+                                        <label>Quantité personnalisée</label>
+                                        <input class="form-control" name="userInputs[{{ option.productOption.code }}]" data-option="{{ option.productOption.code }}" type="text" />
+                                        {# optional: you can use option.validations array to do height/min js validation #}
+                                        {# or the API will return an error if input is incorrect #}
+                                    {% endif %}
+                                {# other normal cases #}
+                                {% else %}
+                                    <select class="form-control" name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                                        <option></option>
+                                        {% for allowedValue in option.allowedValues %}
+                                            <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                    </p>
-                    {% set stepTree = stepTree + 1 %}
+                        {% set stepTree = stepTree + 1 %}
+                    </div>
                 {% endif %}
             {% endfor %}
-                <input type="submit" name="get variants price" />
+                <input type="submit" name="get variants price" class="btn btn-primary" />
             </form>
          </div>
-        <div class="column">
-            <h3>Etape 2: selection Variante (Prix)</h3>
-            <table id="variants" border="1">
-            </table>
-            <div id="links"></div>
+        <div class="col-5">
+            <div class="row">
+                <div class="col">
+                    <h2>Step 2: select variant (price)</h2>
+                    <table class="table table-bordered table-hover">
+                        <thead style="display:none">
+                            <th>Delay</th>
+                            <th>Estimated Delivery Date</th>
+                            <th>Variant Code</th>
+                            <th>Price</th>
+                            <th>Action</th>
+                        </thead>
+                        <tbody id="variants">
+                        </tbody>
+                    </table>
+                    <div class="alert alert-primary" role="alert" style="display:none" id="variantalert" >
+                      Variant code has been set in the order form below.
+                    </div>
+                    <div class="alert alert-primary" role="alert" id="variantalertwait" >
+                      Please select all options first.
+                    </div>
+                    <div id="links"></div>
+                </div>
+            </div>
+            <hr/>
+            <div class="row">
+                <div class="col">
+                    <h2>Step 3: upload file to get document hash</h2>
+                    <form id="upload" method="post" action="{{ path('app_document_upload') }}">
+                        <div class="form-group">
+                            <label for="file">Sélectionner votre fichier</label>
+                            <input type="file" id="file" name="document" class="form-control-file"/>
+                        </div>
+                        <div class="alert alert-primary" role="alert" id="variantalertwait" >
+                            This will set document hash in the form below.
+                        </div>
+                        <input type="submit" class="btn btn-primary" name="uploader" />
+                    </form>
+                </div>
+            </div>
+            
         </div>
     </div>
-    <div class="row>">
-        <div class="column">
-            <h3>Etape 3: Envoyer une image pour obtenir le document hash</h3>
-            <form id="upload" method="post" action="{{ path('app_document_upload') }}">
-                <input type="file" id="file" name="document" />*
-                <input type="submit" name="uploader" />
-            </form>
-            <form id="order" method="post" action="{{ path('app_order_create') }}">
-                <h3>Etape 4: Creation commande</h3>
-                <p><input type="email" name="customerEmail" placeholder="email" /></p>
-                <p><input type="text" name="externalCustomerId" placeholder="externalCustomerId" /></p>
-                <p><input type="text" name="productVariantCode" id="variant" placeholder="code de la variante" required="required" />*</p>
-                <p><input type="text" name="documents[]" id="hash" placeholder="document hash" required="required" />*</p>
-                <p><label>livraison pro ?</label><input type="radio" name="professionalShipping" value="1" /></p>
-                <p>adresse de livraison</p>
-                <p><input type="text" name="shippingAddress[firstName]" placeholder="firstname" required="required" />*</p>
-                <p><input type="text" name="shippingAddress[lastName]" placeholder="lastname" required="required" />*</p>
-                <p><input type="text" name="shippingAddress[phoneNumber]" placeholder="phonenumber" required="required" />*</p>
-                <p><input type="text" name="shippingAddress[company]" placeholder="company" /></p>
-                <p><input type="text" name="shippingAddress[street]" placeholder="street" required="required" />*</p>
-                <p><input type="text" name="shippingAddress[postcode]" placeholder="zipcode" required="required" />*</p>
-                <p><input type="text" name="shippingAddress[city]" placeholder="city" required="required" />*</p>
-                <p>{% include '_country.html.twig' with {'inputName': 'shippingAddress[countryCode]'} %}</p>
-                <p><input type="submit" name="commander" /></p>
-            </form>
+    <hr/>
+    <div class="row">
+        <div class="col">
+            <h2>Step 4: Create order</h2>
         </div>
     </div>
+    <form id="order" method="post" action="{{ path('app_order_create') }}">
+    <div class="row">
+        <div class="col-6">
+            <h4>Main information</h4>
+            <div class="form-group">
+                <label for="customerEmail">Email address</label>
+                <input type="email" name="customerEmail" class="form-control" id="customerEmail" placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label for="externalCustomerId">Your customerID (for future reference)</label>
+                <input type="text" name="externalCustomerId" class="form-control" id="externalCustomerId" placeholder="externalCustomerId">
+            </div>
+            <div class="form-group">
+                <label for="productVariantCode">Variant Code *</label>
+                <input type="text" name="productVariantCode" class="form-control" id="variant" placeholder="productVariantCode" required="required" >
+            </div>
+            <div class="form-group">
+                <label for="hash">Document Hash*</label>
+                <input type="text" name="documents[]" class="form-control" id="hash" placeholder="documentHash" required="required" >
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="1" id="professionalShipping" name="professionalShipping">
+                <label class="form-check-label" for="professionalShipping">
+                    Professionnal shipping (should only be set for special kind of deliveries)
+                </label>
+            </div>  
+        </div>
+        <div class="col-6">
+            <h4>Delivery address</h4>
+            <div class="form-group">
+                <label for="shippingAddress_firstName">Fistname</label>
+                <input type="text" name="shippingAddress[firstName]" class="form-control" id="shippingAddress_firstName" placeholder="firstname" required="required">
+            </div>
+            <div class="form-group">
+                <label for="shippingAddress_lastName">Lastname</label>
+                <input type="text" name="shippingAddress[lastName]" class="form-control" id="shippingAddress_lastName" placeholder="lastName" required="required">
+            </div>
+            <div class="form-group">
+                <label for="shippingAddress_company">Company</label>
+                <input type="text" name="shippingAddress[company]" class="form-control" id="shippingAddress_company" placeholder="company">
+            </div>
+            <div class="form-group">
+                <label for="shippingAddress_street">Street</label>
+                <input type="text" name="shippingAddress[street]" class="form-control" id="shippingAddress_street" placeholder="street" required="required">
+            </div>
+            <div class="form-group">
+                <label for="shippingAddress_postcode">Postcode</label>
+                <input type="text" name="shippingAddress[postcode]" class="form-control" id="shippingAddress_postcode" placeholder="postcode" required="required">
+            </div>
+            <div class="form-group">
+                <label for="shippingAddress_city">City</label>
+                <input type="text" name="shippingAddress[city]" class="form-control" id="shippingAddress_city" placeholder="city" required="required">
+            </div>
+            <div class="form-group">
+                <label for="shippingAddress_countrycode">Country</label>
+                {% include '_country.html.twig' with {'inputName': 'shippingAddress[countryCode]', 'classes': 'country form-control'} %}
+            </div>
+        </div>
+        <input type="submit" class="btn btn-primary" name="commander" />
+        
+    </div>
+    </form>
     <script
             src="https://code.jquery.com/jquery-3.3.1.min.js"
             integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
@@ -126,19 +232,24 @@
                             }
                         }
                         if (variant.estimatedDeliveryDate) {
-                            trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toString() + '</td>';
+                            trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toDateString() + '</td>';
                         }
 
-                        trHTML += '<td><a href="javascript:void" onclick="window.open(\'{{ path('app_product_getvariant', {'variantCode': 'CODE'}) }}\'.replace(\'CODE\', this.innerText))">' + variant.code + '</a><br />voir la variante</td>';
-                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a href="javascript:selectVariant(\''+variant.code+'\')" >choisir cette variante</a></td>';
+                        trHTML += '<td><a href="javascript:void" onclick="window.open(\'{{ path('app_product_getvariant', {'variantCode': 'CODE'}) }}\'.replace(\'CODE\', this.innerText))">' + variant.code + '</a></td>';
+                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a class="btn btn-primary" href="javascript:selectVariant(\''+variant.code+'\')" >Sélectionner</a></td>';
                         trHTML += '</tr>';
                     });
                     $('#variants').empty().append(trHTML);
-                    let linksHTML = '';
+                    $('#variants').parent().find('thead').show();
+                    $('#variantalertwait').hide();
+
+
+                    let linksHTML = '<nav><ul class="pagination">';
                     $.each(data.links, function (linkType, linkParams) {
                         const linkParamsUrl = $.param(linkParams);
-                        linksHTML += '<a href="javascript:void" onclick="' + "$('form#steps').attr('action', $('form#steps').attr('action') +'?"+linkParamsUrl+"'); $('form#steps').submit();" + '">' + linkType + '</a><br />';
+                        linksHTML += '<li class="page-item"><a href="javascript:void" onclick="' + "$('form#steps').attr('action', $('form#steps').attr('action') +'?"+linkParamsUrl+"'); $('form#steps').submit();" + '">' + linkType + '</a></li>';
                     });
+                    linksHTML += '</ul></nav>'
                     $('#links').empty().append(linksHTML);
                 })
                 .fail(function(error) {
@@ -234,7 +345,7 @@
         }
         function selectVariant(code) {
             $('#variant').val(code);
-
+            $('#variantalert').show().delay(5000).fadeOut();
             return false;
         }
     </script>
@@ -242,16 +353,8 @@
 {% block css %}
     {{ parent() }}
     <style type="text/css">
-        .column {
-            float: left;
-            width: 33%;
-        }
-
-        /* Clear floats after the columns */
-        .row:after {
-            content: "";
-            display: table;
-            clear: both;
+        select option:disabled{
+            color:red;
         }
     </style>
 {% endblock %}

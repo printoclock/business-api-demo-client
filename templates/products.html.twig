@@ -1,12 +1,57 @@
 {% extends '_layout.html.twig' %}
 
-{% block title %}products{% endblock %}
+{% block title %}Product List {% endblock %}
 {% block content %}
-    <h1>products:</h1>
-    {% for product in products %}
-        <h3><a href="{{ path('app_product_get', {'code': product.code}) }}">{{ product.name }}</a></h3>
-    {% endfor %}
-    {% for linkType, linkParams in links %}
-        <a href="{{ path('app_product_list', linkParams) }}">{{ linkType }}</a><br />
-    {% endfor %}
+    <h1>Product list</h1>
+    <nav aria-label="Page navigation example">
+		<ul class="pagination">
+			{% for linkType, linkParams in links %}
+		        <li class="page-item"><a class="page-link" href="{{ path('app_product_list', linkParams) }}">{{ linkType }}</a></li>
+		    {% endfor %}
+		</ul>
+	</nav>
+    <table class="table table-bordered table-hover">
+	    <thead>
+		  	<tr>
+				<th style="width:10%" scope="col">CODE</th>
+				<th style="width:10%" scope="col">Name</th>
+				<th style="width:30%" scope="col">Image</th>
+				<th style="width:40%" scope="col">Description</th>
+				<th style="width:10%" scope="col">Action</th>
+		    </tr>
+		</thead>
+		<tbody>
+	    {% for product in products %}
+	    	<tr>
+		      <th scope="row">{{ product.code }}</th>
+		      <td>{{ product.name }}</td>
+		      <td>
+		      	{% if product.images %}
+		      	{% for image in product.images %}
+				    <img style="max-width:200px" class="img-fluid img-thumbnail" src="{{image.path}}" />
+				{% endfor %}
+				{% else %}
+					No image
+				{% endif %}
+			  </td>
+		      <td>
+		      	{% if product.apiDescription %}
+		      		{{ product.apiDescription|raw }}
+		      	{% else %}
+					No description
+				{% endif %}
+		      </td>
+		      <td><a class="btn btn-outline-primary" href="{{ path('app_product_get', {'code': product.code}) }}">Show</a></td>
+		    </tr>
+	    {% endfor %}
+	    </tbody>
+	</table>
+	<nav>
+		<ul class="pagination">
+			{% for linkType, linkParams in links %}
+		        <li class="page-item"><a class="page-link" href="{{ path('app_product_list', linkParams) }}">{{ linkType }}</a></li>
+		    {% endfor %}
+		</ul>
+	</nav>
+    
 {% endblock %}
