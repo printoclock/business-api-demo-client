@@ -89,7 +89,7 @@
                     <h2>Step 2: select variant (price)</h2>
                     <table class="table table-bordered table-hover">
                         <thead style="display:none">
-                            <th>Delay</th>
+                            <th>Options</th>
                             <th>Estimated Delivery Date</th>
                             <th>Variant Code</th>
                             <th>Price</th>
@@ -123,7 +123,6 @@
                     </form>
                 </div>
             </div>
-            
         </div>
     </div>
     <hr/>
@@ -194,10 +193,6 @@
         
     </div>
     </form>
-    <script
-            src="https://code.jquery.com/jquery-3.3.1.min.js"
-            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-            crossorigin="anonymous"></script>
     <script type="text/javascript">
         $('form#steps').on('submit', function(e) {
             e.preventDefault();
@@ -225,12 +220,13 @@
                 .done(function(data) {
                     let trHTML = '';
                     $.each(data.variants, function (i, variant) {
-                        trHTML += '<tr>';
+                        trHTML += '<tr><td>';
                         for (let i = 0; i < variant.optionValues.length; i++) {
                             if (dataForm['optionValueCodes'].indexOf(variant.optionValues[i].code.toString()) === -1) {
-                                trHTML += '<td>' + variant.optionValues[i].option.code + ': ' + variant.optionValues[i].value + '</td>';
+                                trHTML += '<em>' + variant.optionValues[i].option.code + ':</em> ' + variant.optionValues[i].value + '<br />';
                             }
                         }
+                        trHTML + '</td>';
                         if (variant.estimatedDeliveryDate) {
                             trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toDateString() + '</td>';
                         }
@@ -247,7 +243,7 @@
                     let linksHTML = '<nav><ul class="pagination">';
                     $.each(data.links, function (linkType, linkParams) {
                         const linkParamsUrl = $.param(linkParams);
-                        linksHTML += '<li class="page-item"><a href="javascript:void" onclick="' + "$('form#steps').attr('action', $('form#steps').attr('action') +'?"+linkParamsUrl+"'); $('form#steps').submit();" + '">' + linkType + '</a></li>';
+                        linksHTML += '<li class="page-item"><a class="page-link" href="javascript:void" onclick="' + "$('form#steps').attr('action', $('form#steps').attr('action') +'?"+linkParamsUrl+"'); $('form#steps').submit();" + '">' + linkType + '</a></li>';
                     });
                     linksHTML += '</ul></nav>'
                     $('#links').empty().append(linksHTML);
