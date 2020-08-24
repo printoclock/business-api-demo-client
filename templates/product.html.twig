@@ -47,6 +47,17 @@
                                 <input class="form-control" name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
                                 {# optional: you can use option.validations array to do height/min js validation #}
                                 {# or the API will return an error if input is incorrect #}
+                            {# specific size_quantity option (for textiles) #}
+                            {# API is waiting for [optionValueCode]=quantity #}
+                            {% elseif option.productOption.code == 'size_quantity' %}
+                                {% if option.allowedValues|length %}
+                                    <div class="form-group">
+                                    {% for allowedValue in option.allowedValues %}
+                                        <label for="form-{{ option.productOption.code }}-{{ allowedValue.code }}">{{ allowedValue.value }}</label>
+                                        <input id="form-{{ option.productOption.code }}-{{ allowedValue.code }}" class="form-control" name="userInputs[{{ option.productOption.code }}][{{ allowedValue.code }}]" placeholder="0" type="number" />
+                                    {% endfor %}
+                                    </div>
+                                {% endif %}
                             {% else %}
                                 {# specific quantity option #}
                                 {% if option.productOption.code == 'quantity' %}
