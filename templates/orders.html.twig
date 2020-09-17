@@ -30,6 +30,6 @@
         {% endfor %}
     </table>
     {% for linkType, linkParams in links %}
-        <a href="{{ path('app_order_index', linkParams) }}">{{ linkType }}</a><br />
+        <a href="{{ path('app_order_list', linkParams) }}">{{ linkType }}</a><br />
     {% endfor %}
 {% endblock %}

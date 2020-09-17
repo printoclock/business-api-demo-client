@@ -22,8 +22,6 @@ class DocumentController extends AbstractController
     }
 
     /**
-     * @Route("/documents", methods={"POST"})
-     *
      * @param Request $request
      * @return JsonResponse
      * @throws \Exception

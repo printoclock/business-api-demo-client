@@ -21,8 +21,6 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/")
-     *
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
@@ -42,8 +40,6 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/products/{code}")
-     *
      * @param string $code
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
@@ -56,8 +52,6 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/products/{productCode}/variants")
-     *
      * @param Request $request
      * @param string $productCode
      * @return JsonResponse
@@ -80,8 +74,6 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/variants/{variantCode}")
-     *
      * @param Request $request
      * @param string $variantCode
      * @return JsonResponse

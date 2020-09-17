@@ -1,0 +1,34 @@
+app_product_list:
+    path: /
+    methods: [GET]
+    controller: App\Controller\ProductController::listAction
+
+app_product_get:
+    path: /products/{code}
+    methods: [GET]
+    controller: App\Controller\ProductController::getAction
+
+app_product_get_variant:
+    path: /variants/{variantCode}
+    methods: [GET]
+    controller: App\Controller\ProductController::getVariantAction
+
+app_product_get_variants:
+    path: /products/{productCode}/variants
+    methods: [GET]
+    controller: App\Controller\ProductController::getVariantsAction
+
+app_order_post:
+    path: /orders
+    methods: [POST]
+    controller: App\Controller\OrderController::createAction
+
+app_order_list:
+    path: /orders
+    methods: [GET]
+    controller: App\Controller\OrderController::indexAction
+
+app_document_post:
+    path: /documents
+    methods: [POST]
+    controller: App\Controller\DocumentController::uploadAction

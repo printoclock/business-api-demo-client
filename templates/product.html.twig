@@ -34,7 +34,7 @@
         </div>
         <div class="col-3">
              <h2>Step 1 : Select options</h2>
-            <form id="steps" name="product" action="{{ path('app_product_getvariants', {'productCode': product.code}) }}">
+            <form id="steps" name="product" action="{{ path('app_product_get_variants', {'productCode': product.code}) }}">
             {% for option in product.stepsOptions %}
                 {% if not option.hide %}
                     <div class="form-group">
@@ -122,7 +122,7 @@
             <div class="row">
                 <div class="col">
                     <h2>Step 3: upload file to get document hash</h2>
-                    <form id="upload" method="post" action="{{ path('app_document_upload') }}">
+                    <form id="upload" method="post" action="{{ path('app_document_post') }}">
                         <div class="form-group">
                             <label for="file">Sélectionner votre fichier</label>
                             <input type="file" id="file" name="document" class="form-control-file"/>
@@ -142,7 +142,7 @@
             <h2>Step 4: Create order</h2>
         </div>
     </div>
-    <form id="order" method="post" action="{{ path('app_order_create') }}">
+    <form id="order" method="post" action="{{ path('app_order_post') }}">
     <div class="row">
         <div class="col-6">
             <h4>Main information</h4>
@@ -242,7 +242,7 @@
                             trHTML += '<td>' + new Date(variant.estimatedDeliveryDate).toDateString() + '</td>';
                         }
 
-                        trHTML += '<td><a href="javascript:void" onclick="window.open(\'{{ path('app_product_getvariant', {'variantCode': 'CODE'}) }}\'.replace(\'CODE\', this.innerText))">' + variant.code + '</a></td>';
+                        trHTML += '<td><a href="javascript:void" onclick="window.open(\'{{ path('app_product_get_variant', {'variantCode': 'CODE'}) }}\'.replace(\'CODE\', this.innerText))">' + variant.code + '</a></td>';
                         trHTML += '<td>' + variant.finalPrice + '€</td><td><a class="btn btn-primary" href="javascript:selectVariant(\''+variant.code+'\')" >Sélectionner</a></td>';
                         trHTML += '</tr>';
                     });

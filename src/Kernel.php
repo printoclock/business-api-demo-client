@@ -55,8 +55,7 @@ class Kernel extends BaseKernel
             $routes->import('@WebProfilerBundle/Resources/config/routing/profiler.xml', '/_profiler');
         }
 
-        // load the annotation routes
-        $routes->import(__DIR__.'/../src/Controller/', '/', 'annotation');
+        $routes->import(__DIR__.'/../config/routing.yaml');
     }
 
     // optional, to use the standard Symfony cache directory
