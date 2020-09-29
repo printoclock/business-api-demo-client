@@ -8,7 +8,7 @@
     </h1>
     {% set stepTree = 0 %}
     <div class="row">
-        <div class="col-4">
+        <div class="col-6">
             <h3>Images</h3>
             <div class="row">
                 {% if product.images %}
@@ -32,7 +32,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-3">
+        <div class="col-6">
              <h2>Step 1 : Select options</h2>
             <form id="steps" name="product" action="{{ path('app_product_get_variants', {'productCode': product.code}) }}">
             {% for option in product.stepsOptions %}
@@ -93,47 +93,42 @@
             {% endfor %}
                 <input type="submit" name="get variants price" class="btn btn-primary" />
             </form>
-         </div>
-        <div class="col-5">
-            <div class="row">
-                <div class="col">
-                    <h2>Step 2: select variant (price)</h2>
-                    <table class="table table-bordered table-hover">
-                        <thead style="display:none">
-                            <th>Options</th>
-                            <th>Estimated Delivery Date</th>
-                            <th>Variant Code</th>
-                            <th>Price</th>
-                            <th>Action</th>
-                        </thead>
-                        <tbody id="variants">
-                        </tbody>
-                    </table>
-                    <div class="alert alert-primary" role="alert" style="display:none" id="variantalert" >
-                      Variant code has been set in the order form below.
-                    </div>
-                    <div class="alert alert-primary" role="alert" id="variantalertwait" >
-                      Please select all options first.
-                    </div>
-                    <div id="links"></div>
-                </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <h2>Step 2: select variant (price)</h2>
+            <table class="table table-bordered table-hover">
+                <thead style="display:none">
+                    <th>Options</th>
+                    <th>Estimated Delivery Date</th>
+                    <th>Variant Code</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </thead>
+                <tbody id="variants">
+                </tbody>
+            </table>
+            <div class="alert alert-primary" role="alert" style="display:none" id="variantalert" >
+              Variant code has been set in the order form below.
             </div>
-            <hr/>
-            <div class="row">
-                <div class="col">
-                    <h2>Step 3: upload file to get document hash</h2>
-                    <form id="upload" method="post" action="{{ path('app_document_post') }}">
-                        <div class="form-group">
-                            <label for="file">Sélectionner votre fichier</label>
-                            <input type="file" id="file" name="document" class="form-control-file"/>
-                        </div>
-                        <div class="alert alert-primary" role="alert" id="variantalertwait" >
-                            This will set document hash in the form below.
-                        </div>
-                        <input type="submit" class="btn btn-primary" name="uploader" />
-                    </form>
-                </div>
+            <div class="alert alert-primary" role="alert" id="variantalertwait" >
+              Please select all options first.
             </div>
+            <div id="links"></div>
+        </div>
+        <div class="col-6">
+            <h2>Step 3: upload file to get document hash</h2>
+            <form id="upload" method="post" action="{{ path('app_document_post') }}">
+                <div class="form-group">
+                    <label for="file">Sélectionner votre fichier</label>
+                    <input type="file" id="file" name="document" class="form-control-file"/>
+                </div>
+                <div class="alert alert-primary" role="alert" id="variantalertwait" >
+                    This will set document hash in the form below.
+                </div>
+                <input type="submit" class="btn btn-primary" name="uploader" />
+            </form>
         </div>
     </div>
     <hr/>
@@ -182,6 +177,10 @@
             <div class="form-group">
                 <label for="shippingAddress_company">Company</label>
                 <input type="text" name="shippingAddress[company]" class="form-control" id="shippingAddress_company" placeholder="company">
+            </div>
+            <div class="form-group">
+                <label for="shippingAddress_lastName">email</label>
+                <input type="email" name="shippingAddress[email]" class="form-control" id="shippingAddress_email" placeholder="email">
             </div>
             <div class="form-group">
                 <label for="shippingAddress_street">Street</label>
