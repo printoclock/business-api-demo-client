@@ -242,7 +242,7 @@
                         }
 
                         trHTML += '<td><a href="javascript:void" onclick="window.open(\'{{ path('app_product_get_variant', {'variantCode': 'CODE'}) }}\'.replace(\'CODE\', this.innerText))">' + variant.code + '</a></td>';
-                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a class="btn btn-primary" href="javascript:selectVariant(\''+variant.code+'\')" >Sélectionner</a></td>';
+                        trHTML += '<td>' + variant.finalPrice + '€</td><td><a class="btn btn-primary" href="javascript:void(selectVariant(\''+variant.code+'\'))" >Sélectionner</a></td>';
                         trHTML += '</tr>';
                     });
                     $('#variants').empty().append(trHTML);
