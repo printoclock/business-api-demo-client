@@ -3,6 +3,37 @@
 {% block title %}Product List {% endblock %}
 {% block content %}
     <h1>Product list</h1>
+
+    <form class="form pb-5">
+        <h2>Filter products</h2>
+        <div class="row">
+            <div class="col-4">
+                <div class="form-group">
+                    <label for="code">Code</label><br>
+                    <input class="form-control" type="text" name="filter[code]" value="{{ app.request.query.get('filter').code|default }}">
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label for="name">Name</label><br>
+                    <input class="form-control" type="text" name="filter[name]" value="{{ app.request.query.get('filter').name|default }}">
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <label for="code">Description</label><br>
+                    <input class="form-control" type="text" name="filter[apiDescription]" value="{{ app.request.query.get('filter').apiDescription|default }}">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <input class="btn btn-outline-primary" type="submit" value="Filter">
+                <a href="{{ path('app_product_list') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </div>
+    </form>
+
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             {% for linkType, linkParams in links %}

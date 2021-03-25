@@ -87,9 +87,9 @@ Class PrintoclockBAPI
      * @return Response
      * @throws \Exception
      */
-    public function getProducts($page = 1, $limit = self::DEFAULT_PAGE_LIMIT)
+    public function getProducts($page = 1, $limit = self::DEFAULT_PAGE_LIMIT, $filter = [])
     {
-        $result = $this->request('get', '/products', array('page' => $page, 'limit' => $limit));
+        $result = $this->request('get', '/products', array('page' => $page, 'limit' => $limit, 'filter' => $filter));
 
         return $result;
     }

@@ -29,7 +29,8 @@ class ProductController extends AbstractController
     {
         $page = (int) $request->query->get('page', 1);
         $limit = (int) $request->query->get('limit', PrintoclockBAPI::DEFAULT_PAGE_LIMIT);
-        $response = $this->businessApiClient->getProducts($page, $limit);
+        $filter = $request->query->get('filter', []);
+        $response = $this->businessApiClient->getProducts($page, $limit, $filter);
         $products = json_decode($response->getBody()->getContents(), true);
         $availableLinks = $this->businessApiClient->getLinksFromResponse($response);
 
