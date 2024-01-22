@@ -38,31 +38,31 @@
             {% for option in product.stepsOptions %}
                 {% if not option.hide %}
                     <div class="form-group">
-                        <label for="form_{{ option.productOption.code }}">{{ option.name }}</label>
+                        <label for="form_{{ option.option.code }}">{{ option.name }}</label>
                             {# specific dimensions option #}
                             {# API is waiting for heightxwidth value #}
                             {# but for UX, we split it in two fields height and weight, it will be concatenate when sending query #}
                             {% if option.userInput == 'dimensions' %}
-                                <input class="form-control" id="form_{{ option.productOption.code }}" name="{{ option.productOption.code }}_height" data-option="{{ option.productOption.code }}" placeholder="hauteur (cm)" type="text" required="required" />
-                                <input class="form-control" name="{{ option.productOption.code }}_width" data-option="{{ option.productOption.code }}" placeholder="longueur (cm)" type="text" required="required" />
+                                <input class="form-control" id="form_{{ option.option.code }}" name="{{ option.option.code }}_height" data-option="{{ option.option.code }}" placeholder="hauteur (cm)" type="text" required="required" />
+                                <input class="form-control" name="{{ option.option.code }}_width" data-option="{{ option.option.code }}" placeholder="longueur (cm)" type="text" required="required" />
                                 {# optional: you can use option.validations array to do height/min js validation #}
                                 {# or the API will return an error if input is incorrect #}
                             {# specific size_quantity option (for textiles) #}
                             {# API is waiting for [optionValueCode]=quantity #}
-                            {% elseif option.productOption.code == 'size_quantity' %}
+                            {% elseif option.option.code == 'size_quantity' %}
                                 {% if option.allowedValues|length %}
                                     <div class="form-group">
                                     {% for allowedValue in option.allowedValues %}
-                                        <label for="form-{{ option.productOption.code }}-{{ allowedValue.code }}">{{ allowedValue.value }}</label>
-                                        <input id="form-{{ option.productOption.code }}-{{ allowedValue.code }}" class="form-control" name="userInputs[{{ option.productOption.code }}][{{ allowedValue.code }}]" placeholder="0" type="number" />
+                                        <label for="form-{{ option.option.code }}-{{ allowedValue.code }}">{{ allowedValue.value }}</label>
+                                        <input id="form-{{ option.option.code }}-{{ allowedValue.code }}" class="form-control" name="userInputs[{{ option.option.code }}][{{ allowedValue.code }}]" placeholder="0" type="number" />
                                     {% endfor %}
                                     </div>
                                 {% endif %}
                             {% else %}
                                 {# specific quantity option #}
-                                {% if option.productOption.code == 'quantity' %}
+                                {% if option.option.code == 'quantity' %}
                                     {% if option.allowedValues|length %}
-                                    <select class="form-control" name="userInputs[{{ option.productOption.code }}]" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                                    <select class="form-control" name="userInputs[{{ option.option.code }}]" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
                                         <option></option>
                                         {% for allowedValue in option.allowedValues %}
                                             <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
@@ -73,13 +73,13 @@
                                         </div>
                                         <div class="form-group">
                                         <label>Quantité personnalisée</label>
-                                        <input class="form-control" name="userInputs[{{ option.productOption.code }}]" data-option="{{ option.productOption.code }}" type="text" />
+                                        <input class="form-control" name="userInputs[{{ option.option.code }}]" data-option="{{ option.option.code }}" type="text" />
                                         {# optional: you can use option.validations array to do height/min js validation #}
                                         {# or the API will return an error if input is incorrect #}
                                     {% endif %}
                                 {# other normal cases #}
                                 {% else %}
-                                    <select class="form-control" name="{{ option.productOption.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
+                                    <select class="form-control" name="{{ option.option.code }}" required="required" data-step-tree="{{ stepTree }}" onchange="areOptionValuesAllowed()">
                                         <option></option>
                                         {% for allowedValue in option.allowedValues %}
                                             <option value="{{ allowedValue.code }}">{{ allowedValue.value }}</option>
